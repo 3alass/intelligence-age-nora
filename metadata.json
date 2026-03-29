@@ -1,0 +1,7 @@
+{
+  "name": "Nora - 24/7 Front-Desk",
+  "description": "A 24/7 Front-Desk Specialist that answers calls and captures leads.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
