@@ -7,8 +7,9 @@ export class AudioStreamer {
   constructor() {}
 
   async init() {
-    this.audioContext = new AudioContext({ sampleRate: 24000 });
-    await this.audioContext.resume();
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    this.audioContext = new AudioCtx({ sampleRate: 24000 });
+    this.audioContext.resume().catch(console.error);
     this.nextPlayTime = this.audioContext.currentTime;
     this.isPlaying = true;
   }
@@ -86,8 +87,12 @@ export class AudioRecorder {
   }
 
   async start() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error("Microphone access is not supported in this browser or requires HTTPS.");
+    }
     this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    this.audioContext = new AudioContext({ sampleRate: 16000 });
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    this.audioContext = new AudioCtx({ sampleRate: 16000 });
     await this.audioContext.resume();
 
     this.source = this.audioContext.createMediaStreamSource(this.stream);
@@ -107,7 +112,13 @@ export class AudioRecorder {
         view.setInt16(i * 2, pcm16[i], true);
       }
       
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      const len = bytes.byteLength;
+      for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      const base64 = btoa(binary);
       this.onData(base64);
     };
 

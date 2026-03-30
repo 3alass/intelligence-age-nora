@@ -37,11 +37,19 @@ export function useLiveAPI() {
       setError(null);
       setTranscripts([]);
 
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      console.log("Connecting...");
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("GEMINI_API_KEY is missing. Please check your environment variables.");
+      }
+      const ai = new GoogleGenAI({ apiKey });
       
+      console.log("Initializing audio streamer...");
       audioStreamerRef.current = new AudioStreamer();
       await audioStreamerRef.current.init();
+      console.log("Audio streamer initialized.");
 
+      console.log("Connecting to Live API...");
       const sessionPromise = ai.live.connect({
         model: "gemini-3.1-flash-live-preview",
         callbacks: {
@@ -56,7 +64,11 @@ export function useLiveAPI() {
                  });
                });
             });
-            audioRecorderRef.current.start();
+            audioRecorderRef.current.start().catch((err) => {
+              console.error("Failed to start audio recorder:", err);
+              setError("Microphone access denied or failed.");
+              disconnect();
+            });
           },
           onmessage: async (message: LiveServerMessage) => {
             if (message.serverContent?.modelTurn) {

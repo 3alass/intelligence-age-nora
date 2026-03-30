@@ -18,9 +18,3 @@ View your app in AI Studio: https://ai.studio/apps/331eda81-92ac-45d6-8102-792b8
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
-
-
-Updated deployment for Nora AI - March 2026
- 
----
-**Deployment Status:** Nora AI Agent v1.0 successfully configured for GitHub Pages - March 2026.
